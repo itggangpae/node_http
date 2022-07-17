@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>sessiongStorage 테스트</title>
+<meta charset="UTF-8">
+</head>
+<body>
+	<fieldset>
+		<legend>세션 스토리지 이용</legend>
+		key: <input type="text" id="keyinput" /> 
+		value: <input type="text" id="valueinput" /> 
+		<input type="button" value="삽입" id="addbtn" />
+		<input type="button" value="삭제" id="delbtn" /> 
+		<input type="button" value="윈도우 추가" id="newwindowbtn" />
+	</fieldset>
+
+	<fieldset>
+		<legend>세션 스토리지 데이터</legend>
+		<select id="list" size=10>
+		</select> <input type="button" value="재출력" id="reloadbtn" />
+	</fieldset>
+</body>
+
+<script>
+    var keyinput, valueinput, list;
+
+    var showData = () => {
+        list.innerHTML="";
+        for(var i=0; i<sessionStorage.length; i++)
+        {
+            var temp = sessionStorage.key(i);
+            list.options[list.options.length] = 
+            new Option(temp + ":" + sessionStorage[temp], temp);
+        }
+        keyinput.value = '';
+        valueinput.value=''
+    }
+
+    var init = () => {
+        keyinput = document.getElementById("keyinput");
+        valueinput = document.getElementById("valueinput");
+        list = document.getElementById("list");
+        
+        showData();
+    }
+
+    var addData = () => {
+        sessionStorage[keyinput.value] = valueinput.value;
+        showData();
+    }
+
+    var removeData = () => {
+        delete sessionStorage[keyinput.value];
+        showData();
+    }
+		
+    var onListSelected = () => {
+        var selectData = list.options[list.selectedIndex];
+        keyinput.value = selectData.value;
+        valueinput.value = sessionStorage[selectData.value];
+    }
+
+    window.addEventListener("load", init);
+    document.getElementById('addbtn').addEventListener('click', addData);
+    document.getElementById('delbtn').addEventListener('click', removeData);
+    document.getElementById('newwindowbtn').addEventListener('click', () => {
+        window.open(location.href);
+    });
+    document.getElementById('list').addEventListener('change', onListSelected);
+    document.getElementById('reloadbtn').addEventListener('click', showData);
+
+</script>
+</html>

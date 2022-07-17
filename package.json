@@ -1,0 +1,14 @@
+{
+  "name": "nodehttp",
+  "version": "1.0.0",
+  "description": "http",
+  "main": "index.js",
+  "scripts": {
+    "test": "sample"
+  },
+  "keywords": [
+    "http"
+  ],
+  "author": "adam",
+  "license": "ISC"
+}

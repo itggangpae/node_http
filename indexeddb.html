@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IndexedDB API</title>
+  <style>
+    #formbox{
+        float: left;
+        padding: 20px;
+        border: 1px solid #999999;
+    }
+    #databox{
+        float: left;
+        width: 400px;
+        margin-left: 20px;
+        padding: 20px;
+        border: 1px solid #999999;
+    }
+    #keyword, #text{
+        width: 200px;
+    }
+    #databox > div{
+        padding: 5px;
+        border-bottom: 1px solid #999999;
+    }
+  </style>
+
+  <script>
+    var databax;
+    //데이터 출력을 위한 함수
+    function show() {
+        databox.innerHTML =''
+        var db = {};
+        db.result = openDB.result;
+        db.tx = db.result.transaction("movies", "readwrite");
+        var objectstore = db.tx.objectStore('movies');
+        var cursor = objectstore.openCursor()
+        cursor.addEventListener("success", function(e){
+            var cur = e.result || e.target.result
+            if(cur){
+                console.log(cur.value)
+                databox.innerHTML += 
+            '<div>'+cur.value.id+' - '+cur.value.name+' - '+cur.value.date +
+        '<button onclick="remove(\''+cur.value.id+'\')">remove</button></div>';  
+                cur.continue()
+            }
+        })
+    }
+
+    //문서가 열릴 때 데이터베이스 접속하기
+    function initiate() {
+        databox = document.getElementById('databox');
+        window.indexedDB = window.indexedDB || window.mozIndexedDB
+                || window.webkitIndexedDB || window.msIndexedDB;
+        window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+        window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+        window.IDBCursor = window.IDBCursor || window.webkitIDBCursor || window.msIDBCursor
+        openDB = indexedDB.open('mydb', 1);
+        openDB.onupgradeneeded = function() {
+            var db = {}
+            db.result = openDB.result;
+            db.store = db.result.createObjectStore('movies', {
+                keyPath : 'id'
+            });
+            db.index = db.store.createIndex('SearchYear', 'date', {
+                unique : false
+            });
+        };
+
+        openDB.onsuccess = function(){		
+            show()
+        }
+
+        var button = document.getElementById('save');
+        button.addEventListener('click', addobject, false);
+    }
+
+    window.addEventListener('load', initiate, false);
+
+    //데이터 추가
+    function addobject(){
+        var keyword=document.getElementById('keyword').value;
+        var title=document.getElementById('text').value;
+        var year=document.getElementById('year').value;
+        
+        var db = {};
+        db.result = openDB.result;
+        db.tx = db.result.transaction("movies", "readwrite");
+        db.store = db.tx.objectStore("movies");
+        var request=db.store.add({id: keyword, name: title, date: year});
+        //request.addEventListener('success', function(){ show(keyword) }, false);
+        document.getElementById('keyword').value='';
+        document.getElementById('text').value='';
+        document.getElementById('year').value='';
+
+        show();
+    }
+
+    //삭제 기능
+    function remove(keyword){
+        if(confirm('Are you sure?')){
+            var db = {};
+                db.result = openDB.result;
+                db.tx = db.result.transaction("movies", "readwrite");
+                db.store = db.tx.objectStore("movies");
+            var request=db.store.delete(keyword);
+            request.addEventListener('success', show, false);
+        }
+    }
+</script>
+</head>
+
+<body>
+    <section id="formbox">
+      <form name="form">
+        <p>Keyword:<br><input type="text" name="keyword" id="keyword"></p>
+        <p>Title:<br><input type="text" name="text" id="text"></p>
+        <p>Year:<br><input type="text" name="year" id="year"></p>
+        <p><input type="button" name="save" id="save" value="Save"></p>
+      </form>
+    </section>
+    <section id="databox">
+      No Information available
+    </section>
+</body>
+  
+  
+</html>
